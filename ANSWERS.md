@@ -1,82 +1,64 @@
-# Week 2 Logic Exercises – Written Answers
+# Week 2 Logic Exercises - Written Answers
 
-## Exercise 1 – Predict the Output
+(Write your own name, Student ID and date in the worksheet. Use your own words
+for the reflection - see the note at the bottom.)
 
-| Snippet | Prediction  | Reason                                                                                                                                            |
+## Exercise 1 - Predict the output
 
-| A       | `none \| 0` | `?:` considers `0` as false, so it returns `none`. However, `??` only works when the value is `null` or not set. Since `$x` is `0`, it stays `0`. |
-| B       | `19`        | The loop adds 1, 2, 4, 5, and 7. It skips 3 and 6 because of `continue`. When it reaches 8, `break` stops the loop. So, 1 + 2 + 4 + 5 + 7 = 19.   |
-| C       | `BaC`       | `b = 2` and `c = 3` are both greater than 1, so they are changed to uppercase. `a = 1` does not meet the condition, so it stays lowercase.        |
-| D       | `4ro`       | `trim()` removes the spaces around `Paro`, leaving 4 characters. The last two characters of `Paro` are `ro`.                                      |
+| Snippet | Prediction | Reason |
+|---|---|---|
+| A | `none \| 0` | `?:` treats 0 as false, so it picks 'none'. `??` only replaces null/missing, and $x is 0, so it stays 0. |
+| B | `19` | Adds 1, 2, 4, 5, 7. Skips 3 and 6 (continue). At 8 it breaks. 1+2+4+5+7 = 19. |
+| C | `BaC` | b=2 and c=3 are > 1 so they become capitals. a=1 is not > 1 so it stays small. |
+| D | `4ro` | trim removes spaces so length is 4. substr('Paro', -2) = 'ro'. |
 
-After running the code, all four answers matched my predictions. The two things I had to be careful about were remembering that `??` does not work the same way as `?:`, and that `continue` skips an iteration while `break` stops the loop completely.
+After running: all four matched. (The usual mistakes: thinking `??` works like `?:` in A, and
+forgetting that `continue` skips and `break` stops in B.)
 
----
+## Exercise 2 - Think about
+If the names are not tidied, ' paro ' and 'Paro' are counted as two different places. Every place
+then has only 1 pending request, so the program prints ALL of them as tied. That is wrong,
+because Paro really has 2.
 
-## Exercise 2 – Think About It
+## Exercise 3 - My decision (id 12345)
+`sprintf('%04d', 12345)` gives `12345` (5 digits). I accept this. Cutting it to 4 digits would
+make a wrong reference and could make two requests look the same. (Also written as a comment in helpers.php.)
 
-If the names are not cleaned up first, the program will treat `' paro '` and `'Paro'` as two different places. Because of this, each one would have only one pending request, and the program would show all of them as tied.
+## Exercise 4 - Edge tests
 
-That would be incorrect because they are actually the same place, Paro, and should have two pending requests.
+| wait_band(...) | -1 | 0 | 7 | 8 | 14 | 15 |
+|---|---|---|---|---|---|---|
+| My result | Check date | On time | On time | Follow up | Follow up | Overdue |
 
----
+Edges people usually get wrong first: 7 and 14 (using `< 7` instead of `<= 7`), and -1 (forgetting to
+check "below 0" FIRST, so it wrongly says On time).
 
-## Exercise 3 – My Decision (ID 12345)
+## Exercise 5 - Why an array is better than if/elseif
+To change a rule you edit one line of data, not the logic. The code stays short and easy to read,
+and adding a new status is just one more line in the array.
 
-`sprintf('%04d', 12345)` gives `12345` because the number already has five digits.
+## Exercise 6 - Bug log
 
-I would accept this result. I don't think we should cut it down to four digits because that could change the reference number and might cause two different requests to have the same reference. I also added this decision as a comment in `helpers.php`.
+| # | Symptom (what I saw) | Cause | Fix |
+|---|---|---|---|
+| 1 | Warnings "Undefined array key "Status"" (7 times, line 8) | Key is `'status'` (lower-case). PHP keys are case-sensitive. | Change `['Status']` to `['status']` |
+| 2 | No error, but the first record was never checked (wrong count) | Loop started at `$i = 1`; arrays start at 0 | Start with `$i = 0` |
+| 3 | Every record counted as Submitted (silent wrong answer) | `=` assigns a value; it does not compare | Use `===` |
+| 4 | Total never goes up (silent wrong answer) | `$total + 1;` calculates but does not save | `$total = $total + 1;` |
+| 5 | Fatal error: TypeError, function returned nothing but promises `int` | Missing `return` | Add `return $total;` |
 
----
+Hardest bugs: 3 and 4, because PHP shows no error at all - the code runs, it just gives a wrong
+answer. You only find them by reading the code carefully. Bug 5 only showed up after bug 1-4 were
+understood, because the fatal error comes at the very end.
 
-## Exercise 4 – Edge Tests
-
-| `wait_band(...)` | -1         | 0       | 7       | 8         | 14        | 15      |
-| ---------------- | ---------- | ------- | ------- | --------- | --------- | ------- |
-| My result        | Check date | On time | On time | Follow up | Follow up | Overdue |
-
-The values I would be most careful with are **7 and 14**, because the conditions need to include those numbers correctly. For example, using `< 7` instead of `<= 7` would give the wrong result for 7.
-
-I also had to make sure that `-1` was checked first. Otherwise, it could incorrectly be treated as being on time.
-
----
-
-## Exercise 5 – Why an Array Is Better Than `if/elseif`
-
-I think using an array is better because the rules are easier to manage. If I need to change a rule, I can just change the data in one place instead of changing a lot of `if/elseif` statements.
-
-It also keeps the code shorter and easier to understand. If I want to add another status later, I can simply add another line to the array.
-
----
-
-## Exercise 6 – Bug Log
-
-| # | Symptom                                                                                      | Cause                                                                                  | Fix                                  |
-| - | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------ |
-| 1 | I got the warning `Undefined array key "Status"` 7 times.                                    | The actual key was `'status'` with a lowercase `s`. PHP array keys are case-sensitive. | Change `['Status']` to `['status']`. |
-| 2 | The first record was not checked, so the count was wrong.                                    | The loop started at `$i = 1`, but arrays start at index 0.                             | Start the loop with `$i = 0`.        |
-| 3 | Every record was counted as Submitted.                                                       | I used `=` instead of comparing the values. `=` assigns a value.                       | Use `===` for the comparison.        |
-| 4 | The total never increased.                                                                   | `$total + 1;` calculates the new value but does not store it.                          | Use `$total = $total + 1;`.          |
-| 5 | I got a TypeError because the function was supposed to return an `int` but returned nothing. | The function was missing a `return` statement.                                         | Add `return $total;`.                |
-
-The hardest bugs for me were **3 and 4** because PHP did not show an error. The program still ran, but the result was wrong. I had to look carefully at the code to find the problem.
-
-Bug 5 became noticeable after fixing the earlier problems because the missing `return` caused an error at the end.
+## Exercise 7 - Think about
+A duplicate is not always an error. The same person may have sent two requests (for example a
+resubmission). But requests 1 and 4 (and 3 and 7) have DIFFERENT names on the same CID, so one may be
+a typing mistake or even fraud. Karma should check the original documents and contact the people,
+not delete or reject automatically.
 
 ---
-
-## Exercise 7 – Think About It
-
-I don't think every duplicate request should automatically be considered an error. The same person could send another request because they made a mistake or had to resubmit something.
-
-However, requests 1 and 4, and requests 3 and 7, have different names but the same CID. This could be a typing mistake, or it could be something more serious.
-
-Because of that, I think Karma should check the original documents and contact the people involved before making a decision. The requests should not be automatically deleted or rejected just because they look like duplicates.
-
----
-
-## AI-Use Reflection
-
-I used AI to help me understand and work through the exercises. I accepted some of the explanations and answers, but I also checked the code and compared the results with the expected output.
-
-I read through the files and made sure I understood the main reasons behind the answers before completing the worksheet.
+Note on the AI-use declaration: the worksheet says to record AI use. Write honestly in the weekly
+reflection what you asked for (e.g. "asked AI to solve the exercises"), what you accepted, and how you
+checked it (e.g. "ran every file and compared to the expected output"). Read through each file and make
+sure you can explain every line before you submit.
